@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Empire builder: the Magadha challenge</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="CuriousEd-logo.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap');
+        
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: #fdf6e3;
+            color: #232323;
+        }
+        h1, h2, h3 {
+            color: #77a766 !important;
+        }
+        .parchment {
+            background-color: #f4e4bc;
+            background-image: url("https://www.transparenttextures.com/patterns/natural-paper.png");
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            border: 2px solid #77a766;
+        }
+        .drop-zone {
+            min-height: 80px;
+            transition: all 0.3s ease;
+        }
+        .card {
+            cursor: grab;
+            transition: transform 0.2s;
+            user-select: none;
+            color: #232323;
+            font-size: 0.875rem;
+        }
+        .card:active {
+            cursor: grabbing;
+        }
+        
+        /* Brand colors */
+        .box-blue { border-color: #318ec3 !important; color: #318ec3 !important; }
+        .box-purple { border-color: #724b9e !important; color: #724b9e !important; }
+        .box-yellow { border-color: #e8d227 !important; color: #857200 !important; }
+        .box-red { border-color: #b83f5c !important; color: #b83f5c !important; }
+        
+        /* Feedback states */
+        .correct-state { border-color: #77a766 !important; background-color: #f0fdf4 !important; color: #166534 !important; }
+        .wrong-state { border-color: #b83f5c !important; background-color: #fef2f2 !important; color: #991b1b !important; }
+        
+        .instruction-box {
+            background-color: rgba(255, 255, 255, 0.5);
+            border-left: 4px solid #724b9e;
+            padding: 0.75rem;
+            margin-bottom: 1rem;
+            border-radius: 0.5rem;
+        }
+
+        /* Logo crop wrapper */
+        .logo-wrapper {
+            width: 60px;
+            height: 60px;
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            justify-content: flex-end;
+        }
+        .logo-wrapper img {
+            height: 100%;
+            width: auto;
+            max-width: none;
+            object-fit: contain;
+        }
+
+        @media (max-width: 640px) {
+            .logo-wrapper {
+                width: 45px;
+                height: 45px;
+            }
+        }
+    </style>
+</head>
+<body class="p-2 md:p-6 flex flex-col min-h-screen">
+
+    <div class="max-w-4xl mx-auto flex-grow w-full">
+        <!-- Header with logo -->
+        <header class="relative flex flex-col items-center mb-6">
+            <div class="w-full flex justify-between items-start">
+                <div class="flex-grow text-center">
+                    <h1 class="text-3xl md:text-5xl font-bold mb-1">Empire builder</h1>
+                    <p class="text-base md:text-lg">Master the rise of Magadha</p>
+                </div>
+                <div class="absolute right-0 top-0">
+                    <div class="logo-wrapper">
+                        <img src="CuriousEd-logo.png" alt="Logo icon">
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Game screen -->
+        <div id="game-container" class="parchment rounded-lg p-4 md:p-6 min-h-[550px]">
+            
+            <!-- Objectives section -->
+            <div id="objectives-section" class="mb-6 p-4 bg-white/40 rounded-lg border-l-4 border-[#77a766]">
+                <h2 class="text-lg font-bold mb-2">Objectives</h2>
+                <ol class="list-decimal list-inside space-y-1 font-medium text-sm md:text-base">
+                    <li>Define the term empire and distinguish it from a kingdom.</li>
+                    <li>Identify the key political, geographical, economic, and military factors that enabled the transition from kingdoms to empires.</li>
+                </ol>
+            </div>
+
+            <!-- Phase 1: Kingdom vs Empire -->
+            <div id="phase-1">
+                <div class="mb-4">
+                    <h2 class="text-xl md:text-2xl font-bold border-b-2 border-gray-200 pb-1 mb-3">Phase 1: Kingdom or empire?</h2>
+                    
+                    <div class="instruction-box">
+                        <h3 class="text-xs font-bold mb-1" style="color: #724b9e !important;">Instructions</h3>
+                        <p class="text-sm mb-1">Drag the trait cards from the bottom deck into the correct scroll. Place local features in the "local kingdom" box and supreme power features in the "mighty empire" box. Click the verify button to check your progress.</p>
+                        <p class="text-sm font-semibold">Note: Factors highlighted in green are correct, while those in pink are wrong.</p>
+                    </div>
+
+                    <p class="text-sm mb-4">Drag the traits below into the correct scroll to understand the difference between a local kingdom and a supreme empire.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    <div class="bg-white/50 border-2 border-dashed box-blue rounded-lg p-3">
+                        <h3 class="text-lg font-bold mb-1 text-center">local kingdom</h3>
+                        <div id="zone-kingdom" class="drop-zone flex flex-wrap gap-2 p-2" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+                    </div>
+                    <div class="bg-white/50 border-2 border-dashed box-purple rounded-lg p-3">
+                        <h3 class="text-lg font-bold mb-1 text-center">mighty empire</h3>
+                        <div id="zone-empire" class="drop-zone flex flex-wrap gap-2 p-2" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+                    </div>
+                </div>
+
+                <div id="deck-1" class="flex flex-wrap justify-center gap-2 p-3 bg-white/30 rounded-lg">
+                    <!-- Items generated by JS -->
+                </div>
+
+                <div class="mt-6 text-center">
+                    <button onclick="checkPhase1()" class="bg-[#77a766] hover:opacity-90 text-white font-bold py-2 px-8 rounded-full shadow-lg transition duration-200">
+                        Verify transitions
+                    </button>
+                </div>
+            </div>
+
+            <!-- Phase 2: The Pillars of Transition -->
+            <div id="phase-2" class="hidden">
+                <div class="mb-4">
+                    <h2 class="text-xl md:text-2xl font-bold border-b-2 border-gray-200 pb-1 mb-3">Phase 2: the pillars of transition</h2>
+                    
+                    <div class="instruction-box" style="border-left-color: #318ec3;">
+                        <h3 class="text-xs font-bold mb-1" style="color: #318ec3 !important;">Instructions</h3>
+                        <p class="text-sm mb-1">To build an empire, many factors must come together. Drag each historical factor into its correct category: political, geographical, economic, or military. This will help you understand the transition from kingdoms to empires.</p>
+                        <p class="text-sm font-semibold">Note: Factors highlighted in green are correct, while those in pink are wrong.</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3 mb-4">
+                    <div class="bg-white/50 border-2 border-dashed box-blue rounded-lg p-2">
+                        <h3 class="text-base font-bold mb-1 text-center">political</h3>
+                        <div id="zone-political" class="drop-zone flex flex-wrap gap-1 p-1" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+                    </div>
+                    <div class="bg-white/50 border-2 border-dashed box-purple rounded-lg p-2">
+                        <h3 class="text-base font-bold mb-1 text-center">geographical</h3>
+                        <div id="zone-geographical" class="drop-zone flex flex-wrap gap-1 p-1" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+                    </div>
+                    <div class="bg-white/50 border-2 border-dashed box-yellow rounded-lg p-2">
+                        <h3 class="text-base font-bold mb-1 text-center">economic</h3>
+                        <div id="zone-economic" class="drop-zone flex flex-wrap gap-1 p-1" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+                    </div>
+                    <div class="bg-white/50 border-2 border-dashed box-red rounded-lg p-2">
+                        <h3 class="text-base font-bold mb-1 text-center">military</h3>
+                        <div id="zone-military" class="drop-zone flex flex-wrap gap-1 p-1" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+                    </div>
+                </div>
+
+                <div id="deck-2" class="flex flex-wrap justify-center gap-2 p-2 bg-white/30 rounded-lg">
+                    <!-- Items generated by JS -->
+                </div>
+
+                <div class="mt-4 text-center">
+                    <button onclick="checkPhase2()" class="bg-[#77a766] hover:opacity-90 text-white font-bold py-2 px-8 rounded-full shadow-lg transition duration-200">
+                        Verify factors
+                    </button>
+                </div>
+            </div>
+
+            <!-- Summary screen -->
+            <div id="summary" class="hidden text-center">
+                <h2 class="text-3xl font-bold mb-6">Great samrāj!</h2>
+                <div class="bg-white/80 p-6 rounded-lg shadow-inner text-left mb-6">
+                    <p class="mb-4">You have successfully defined an <strong>empire</strong> and identified the <strong>political, geographical, economic, and military</strong> pillars that supported its rise.</p>
+                    <p class="mb-4">By understanding how strong kings, fertile lands, trade routes, and powerful armies worked together, you have mastered the history of Magadha's transition.</p>
+                </div>
+                <button onclick="location.reload()" class="bg-[#77a766] hover:opacity-90 text-white font-bold py-3 px-8 rounded-full shadow-lg transition duration-200">
+                    Play again
+                </button>
+            </div>
+
+        </div>
+        
+        <!-- Score & status -->
+        <div class="mt-4 flex justify-between items-center font-bold text-sm md:text-base">
+            <div id="status-msg">Welcome, explorer.</div>
+            <div>Score: <span id="score">0</span></div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="text-center py-4 text-xs font-medium text-gray-500">
+        ©CuriousEd.ai
+    </footer>
+
+    <script>
+        const traits = [
+            { id: 't1', text: 'Small territory', type: 'kingdom' },
+            { id: 't2', text: 'Supreme power (imperium)', type: 'empire' },
+            { id: 't3', text: 'Pays tribute to others', type: 'kingdom' },
+            { id: 't4', text: 'Collects tribute from many', type: 'empire' },
+            { id: 't5', text: 'Unified administration', type: 'empire' },
+            { id: 't6', text: 'Local community focus', type: 'kingdom' },
+            { id: 't7', text: 'Vast communication networks', type: 'empire' }
+        ];
+
+        const factors = [
+            { id: 'f1', text: 'Powerful kings like Ajātasatru', type: 'political' },
+            { id: 'f2', text: 'Unified laws and officials', type: 'political' },
+            { id: 'f3', text: 'Fertile Ganga plains', type: 'geographical' },
+            { id: 'f4', text: 'Forests for timber', type: 'geographical' },
+            { id: 'f5', text: 'Collection of taxes', type: 'economic' },
+            { id: 'f6', text: 'Flourishing trade routes', type: 'economic' },
+            { id: 'f7', text: 'Advanced iron weapons', type: 'military' },
+            { id: 'f8', text: 'Trained war elephants', type: 'military' }
+        ];
+
+        let score = 0;
+
+        function initPhase1() {
+            const deck = document.getElementById('deck-1');
+            traits.sort(() => Math.random() - 0.5).forEach(trait => {
+                const div = document.createElement('div');
+                div.id = trait.id;
+                div.className = 'card bg-white border-2 border-gray-300 px-3 py-1 rounded-lg shadow-sm font-medium';
+                div.draggable = true;
+                div.innerText = trait.text;
+                div.ondragstart = drag;
+                deck.appendChild(div);
+            });
+        }
+
+        function initPhase2() {
+            const deck = document.getElementById('deck-2');
+            factors.sort(() => Math.random() - 0.5).forEach(f => {
+                const div = document.createElement('div');
+                div.id = f.id;
+                div.className = 'card bg-white border-2 border-gray-300 px-2 py-1 rounded-lg shadow-sm font-medium';
+                div.draggable = true;
+                div.innerText = f.text;
+                div.ondragstart = drag;
+                deck.appendChild(div);
+            });
+        }
+
+        function allowDrop(ev) { ev.preventDefault(); }
+        function drag(ev) { ev.dataTransfer.setData("text", ev.target.id); }
+
+        function drop(ev) {
+            ev.preventDefault();
+            const data = ev.dataTransfer.getData("text");
+            const draggedElement = document.getElementById(data);
+            const dropzone = ev.target.closest('.drop-zone');
+            if (dropzone) dropzone.appendChild(draggedElement);
+        }
+
+        function checkPhase1() {
+            let errors = 0;
+            let correctCount = 0;
+
+            traits.forEach(t => {
+                const el = document.getElementById(t.id);
+                const parentZone = el.parentElement.id;
+                
+                if ((t.type === 'kingdom' && parentZone === 'zone-kingdom') || 
+                    (t.type === 'empire' && parentZone === 'zone-empire')) {
+                    el.classList.add('correct-state');
+                    el.classList.remove('wrong-state');
+                    correctCount++;
+                } else {
+                    el.classList.add('wrong-state');
+                    el.classList.remove('correct-state');
+                    errors++;
+                }
+            });
+
+            if (errors === 0 && correctCount === traits.length) {
+                updateStatus("Excellent! Transitioning to the next round...", "green");
+                score += 50;
+                updateScore();
+                setTimeout(() => {
+                    document.getElementById('phase-1').classList.add('hidden');
+                    document.getElementById('phase-2').classList.remove('hidden');
+                    initPhase2();
+                }, 2000);
+            } else {
+                updateStatus("Review the factors! Green is correct, while pink is not.", "red");
+            }
+        }
+
+        function checkPhase2() {
+            let errors = 0;
+            let correctCount = 0;
+
+            factors.forEach(f => {
+                const el = document.getElementById(f.id);
+                const parentZone = el.parentElement.id;
+                
+                if (parentZone === 'zone-' + f.type) {
+                    el.classList.add('correct-state');
+                    el.classList.remove('wrong-state');
+                    correctCount++;
+                } else {
+                    el.classList.add('wrong-state');
+                    el.classList.remove('correct-state');
+                    errors++;
+                }
+            });
+
+            if (errors === 0 && correctCount === factors.length) {
+                updateStatus("Magnificent! You have built the foundation of an empire.", "green");
+                score += 100;
+                updateScore();
+                setTimeout(() => {
+                    document.getElementById('phase-2').classList.add('hidden');
+                    document.getElementById('summary').classList.remove('hidden');
+                }, 2000);
+            } else {
+                updateStatus("Review the factors! Green is correct, while pink is not.", "red");
+            }
+        }
+
+        function updateScore() {
+            document.getElementById('score').innerText = score;
+        }
+
+        function updateStatus(msg, color) {
+            const status = document.getElementById('status-msg');
+            status.innerText = msg;
+            if (color === "green") status.style.color = "#77a766";
+            else if (color === "red") status.style.color = "#b83f5c";
+            else status.style.color = "#232323";
+        }
+
+        window.onload = initPhase1;
+    </script>
+</body>
+</html>
